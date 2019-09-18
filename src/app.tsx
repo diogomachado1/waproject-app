@@ -1,91 +1,63 @@
 import './errorHandler';
 
-import { setConfig } from '@react-form-fields/native-base/config';
-import ConfigBuilder from '@react-form-fields/native-base/config/builder';
-import lang from '@react-form-fields/native-base/lang/pt-br';
+import ConfigProvider, { ConfigBuilder } from '@react-form-fields/native-base/ConfigProvider';
+import langConfig from '@react-form-fields/native-base/ConfigProvider/langs/pt-br';
+import snakeCase from 'lodash/snakeCase';
 import { Root, StyleProvider } from 'native-base';
-import * as React from 'react';
-import { AppRegistry, Keyboard, YellowBox } from 'react-native';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
+import { Keyboard } from 'react-native';
+import firebase from 'react-native-firebase';
+import FlashMessage from 'react-native-flash-message';
+import { MenuProvider } from 'react-native-popup-menu';
 import { NavigationState } from 'react-navigation';
-import { Loader } from '~/components/Shared/Loader';
-import * as loaderOperador from '~/rxjs-operators/loader';
-import { setupServices } from '~/services';
-import logService from '~/services/log';
-import { theme } from '~/theme';
-import getTheme from '~/theme/native-base/components';
+import Loader from '~/components/Shared/Loader';
 
+import { variablesTheme } from './assets/theme';
+import getTheme from './assets/theme/native-base-theme/components';
 import Navigator from './components/Navigator';
 import getCurrentRouteState from './helpers/currentRouteState';
+import { setupServices } from './services';
+import logService from './services/log';
+
+const theme = getTheme(variablesTheme);
 
 const config = new ConfigBuilder()
-  .fromLang(lang)
+  .fromLang(langConfig)
+  .setValidationOn('onSubmit')
+  .setIconProps({ type: 'MaterialCommunityIcons' }, 'chevron-down', 'magnify', 'close')
+  .setItemProps({ floatingLabel: false })
+  .setLoadingProps({ color: theme.variables.brandDark }, { marginRight: 10 })
   .build();
 
-setConfig(config);
+const App = memo(() => {
+  const navigatorRef = useRef<Navigator>();
 
-YellowBox.ignoreWarnings([
-  'Warning: FieldDatepicker has a method',
-  'Warning: componentWillMount is deprecated',
-  'Warning: componentWillUpdate is deprecated',
-  'Warning: componentWillReceiveProps is deprecated',
-  'Warning: isMounted',
-  'Module RNGoogleSignin',
-  'Module SQLite',
-  'Module RCTImageLoader requires'
-]);
+  useEffect(() => setupServices(navigatorRef.current as any), [navigatorRef]);
 
-interface IState {
-  loading: boolean;
-}
-
-class App extends React.Component<any, IState> {
-  private navigator: any;
-  private loader: Loader;
-  private theme: any;
-
-  constructor(props: any) {
-    super(props);
-
-    this.theme = getTheme(theme);
-    this.state = { loading: true };
-  }
-
-  async componentDidMount(): Promise<void> {
-    loaderOperador.setup(this.loader);
-
-    await this.setState({ loading: false });
-    setupServices(this.navigator);
-  }
-
-  setLoaderRef = (loader: Loader) => {
-    this.loader = loader;
-  }
-
-  onNavigationStateChange = (prevState: NavigationState, currentState: NavigationState): void => {
+  const onNavigationStateChange = useCallback((prevState: NavigationState, currentState: NavigationState) => {
     Keyboard.dismiss();
 
     if (!currentState || !currentState.routes || !currentState.routes.length || prevState === currentState) return;
-    logService.breadcrumb(getCurrentRouteState(currentState).routeName, 'navigation');
-  }
 
-  render(): JSX.Element {
-    const { loading } = this.state;
+    const routeName = getCurrentRouteState(currentState).routeName;
 
-    return (
-      <StyleProvider style={this.theme}>
-        <Root>
-          <Loader ref={this.setLoaderRef} />
-          {!loading &&
-            <Navigator
-              ref={(nav: any) => this.navigator = nav}
-              onNavigationStateChange={this.onNavigationStateChange}
-            />
-          }
-        </Root>
-      </StyleProvider>
-    );
-  }
+    logService.breadcrumb(routeName, 'navigation');
+    firebase.analytics().logEvent(snakeCase(`screen_${routeName}`));
+  }, []);
 
-}
+  return (
+    <StyleProvider style={theme}>
+      <MenuProvider>
+        <ConfigProvider value={config}>
+          <Root>
+            <Loader />
+            <Navigator ref={navigatorRef as any} onNavigationStateChange={onNavigationStateChange} />
+            <FlashMessage position='top' />
+          </Root>
+        </ConfigProvider>
+      </MenuProvider>
+    </StyleProvider>
+  );
+});
 
-AppRegistry.registerComponent('reactApp', () => App);
+export default App;

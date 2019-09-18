@@ -3,12 +3,13 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import WithNavigation from '~/decorators/withNavigation';
 import { IUser } from '~/interfaces/models/user';
-import  Toast from '~/facades/toast';
-import RxOp from '~/rxjs-operators';
+import Toast from '~/facades/toast';
 import userService from '~/services/user';
-import { classes, theme } from '~/theme';
 
 import BaseComponent from './Abstract/Base';
+import { logError } from '~/helpers/rxjs-operators/logError';
+import { bindComponent } from '~/helpers/rxjs-operators/bindComponent';
+import { classes, variablesTheme } from '~/assets/theme';
 
 interface IState {
   user?: IUser;
@@ -23,12 +24,18 @@ export default class ButtonHeaderProfile extends BaseComponent<{}, IState> {
   }
 
   componentWillMount(): void {
-    userService.get().pipe(
-      RxOp.logError(),
-      RxOp.bindComponent(this)
-    ).subscribe(({ data: user }) => {
-      this.setState({ user, verified: true });
-    }, err => Toast.error(err));
+    userService
+      .get()
+      .pipe(
+        logError(),
+        bindComponent(this)
+      )
+      .subscribe(
+        ({ data: user }) => {
+          this.setState({ user, verified: true });
+        },
+        err => Toast.showError(err)
+      );
   }
 
   navigateLogin = () => this.navigate('Login');
@@ -54,7 +61,6 @@ export default class ButtonHeaderProfile extends BaseComponent<{}, IState> {
         <Icon name='contact' style={styles.icon} />
       </Button>
     );
-
   }
 }
 
@@ -67,6 +73,6 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: 28,
-    color: theme.toolbarBtnTextColor
+    color: variablesTheme.toolbarBtnTextColor
   }
 });

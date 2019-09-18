@@ -29,6 +29,6 @@ export function removeTime(date: Date): Date {
 export function formatBirthday(value: Date): string {
   if (!value || !(value instanceof Date) || isNaN(value.getTime())) return;
 
-  const format = value.getFullYear() === 1900 ? 'dd \'de\' MMMM' : 'dd \'de\' MMMM \'de\' yyyy';
+  const format = value.getFullYear() === 1900 ? "dd 'de' MMMM" : "dd 'de' MMMM 'de' yyyy";
   return dateFormat(value, format);
 }

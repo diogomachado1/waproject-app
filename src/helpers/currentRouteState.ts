@@ -5,7 +5,5 @@ export default function getCurrentRouteState(navigationState: NavigationState | 
 
   const route = navigationState.routes[navigationState.index];
 
-  return route.routes ?
-    getCurrentRouteState(route) :
-    route;
+  return route.routes ? getCurrentRouteState(route) : route;
 }

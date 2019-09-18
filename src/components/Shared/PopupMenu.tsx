@@ -15,20 +15,23 @@ export class PopupMenu extends React.Component<IProps> {
 
   setRef = (button: Button) => {
     this.button = button;
-  }
+  };
 
   handlePress = (): void => {
     const { actions } = this.props;
 
     if (Platform.OS === 'ios') {
-      ActionSheet.show({
-        options: [...actions, { display: 'Cancelar' }].map(a => a.display),
-        cancelButtonIndex: actions.length,
-        title: 'Selecione'
-      }, buttonIndex => {
-        if (!actions[buttonIndex]) return;
-        actions[buttonIndex].onPress();
-      });
+      ActionSheet.show(
+        {
+          options: [...actions, { display: 'Cancelar' }].map(a => a.display),
+          cancelButtonIndex: actions.length,
+          title: 'Selecione'
+        },
+        buttonIndex => {
+          if (!actions[buttonIndex]) return;
+          actions[buttonIndex].onPress();
+        }
+      );
 
       return;
     }
@@ -40,9 +43,9 @@ export class PopupMenu extends React.Component<IProps> {
       (event: string, buttonIndex: number) => {
         if (event !== 'itemSelected') return;
         actions[buttonIndex].onPress();
-      },
+      }
     );
-  }
+  };
 
   render(): JSX.Element {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

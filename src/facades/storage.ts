@@ -1,39 +1,36 @@
-import { AsyncStorage } from 'react-native';
-import * as Rx from 'rxjs'; import { Observable } from 'rxjs';
-
-import RxOp from '~/rxjs-operators';
+import AsyncStorage from '@react-native-community/async-storage';
+import { Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { apiResponseFormatter } from '~/formatters/apiResponse';
 
 export class StorageService {
-
   public get<T = any>(key: string): Observable<T> {
-    return Rx.of(true).pipe(
-      RxOp.switchMap(() => AsyncStorage.getItem(key)),
-      RxOp.map(data => data ? apiResponseFormatter(JSON.parse(data)) : null)
+    return of(true).pipe(
+      switchMap(() => AsyncStorage.getItem(key)),
+      map(data => (data ? apiResponseFormatter(JSON.parse(data)) : null))
     );
   }
 
   public set<T = any>(key: string, value: T): Observable<T> {
-    return Rx.of(true).pipe(
-      RxOp.switchMap(() => AsyncStorage.setItem(key, JSON.stringify(value))),
-      RxOp.map(() => value)
+    return of(true).pipe(
+      switchMap(() => AsyncStorage.setItem(key, JSON.stringify(value))),
+      map(() => value)
     );
   }
 
   public clear(regexp: RegExp): Observable<void> {
-    return Rx.of(true).pipe(
-      RxOp.switchMap(() => AsyncStorage.getAllKeys()),
-      RxOp.switchMap(keys => {
+    return of(true).pipe(
+      switchMap(() => AsyncStorage.getAllKeys()),
+      switchMap(keys => {
         if (regexp) {
           keys = keys.filter(k => regexp.test(k));
         }
 
-        if (!keys.length) return Rx.of(null);
+        if (!keys.length) return of(null);
         return AsyncStorage.multiRemove(keys);
       })
     );
   }
-
 }
 
 const storageService = new StorageService();

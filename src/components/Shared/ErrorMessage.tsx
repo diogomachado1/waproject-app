@@ -1,55 +1,28 @@
-import * as React from 'react';
+import React, { memo, useMemo } from 'react';
+import { errorIconFormatter, errorMessageFormatter } from '~/formatters/errorMessage';
 
-import EmptyMessage from './EmptyMessage';
-
-interface IState {
-  icon: string;
-  message: string;
-}
+import IconMessage from './IconMessage';
 
 interface IProps {
-  error?: Error;
+  error?: any;
+  disableMargin?: boolean;
   button?: string;
   onPress?: () => void;
-  small?: boolean;
 }
 
-export default class ErrorMessage extends React.PureComponent<IProps, IState> {
-  static getDerivedStateFromProps({ error }: IProps, currentState: IState): IState {
-    let icon, message;
+const ErrorMessage = memo(({ error, onPress, button, ...props }: IProps) => {
+  const icon = useMemo(() => errorIconFormatter(error), [error]);
+  const message = useMemo(() => errorMessageFormatter(error), [error]);
 
-    switch ((error || { message: '' }).message) {
-      case 'no-internet':
-      case 'NETWORK_ERROR':
-        icon = 'ios-wifi';
-        message = 'Sem conexão com a internet';
-        break;
-      case 'api-error':
-        icon = 'thunderstorm';
-        message = 'Não conseguimos se comunicar com o servidor';
-        break;
-      default:
-        icon = 'bug';
-        message = 'Algo deu errado...';
-    }
+  return (
+    <IconMessage
+      icon={icon}
+      message={message}
+      button={button || (onPress ? 'Tentar novamente' : '')}
+      onPress={onPress}
+      {...props}
+    />
+  );
+});
 
-    return {
-      ...currentState,
-      icon,
-      message
-    };
-  }
-
-  constructor(props: IProps) {
-    super(props);
-    this.state = { icon: '', message: '' };
-  }
-
-  render(): JSX.Element {
-    const { icon, message } = this.state;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { error, ...props } = this.props;
-
-    return <EmptyMessage icon={icon} message={message} {...props} />;
-  }
-}
+export default ErrorMessage;

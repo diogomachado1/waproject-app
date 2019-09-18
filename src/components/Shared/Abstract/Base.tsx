@@ -1,5 +1,10 @@
 import { PureComponent } from 'react';
-import { NavigationActions, NavigationNavigateActionPayload, NavigationScreenProp, StackActions } from 'react-navigation';
+import {
+  NavigationActions,
+  NavigationNavigateActionPayload,
+  NavigationScreenProp,
+  StackActions
+} from 'react-navigation';
 import { InteractionManager } from '~/facades/interactionManager';
 
 export default abstract class BaseComponent<P = {}, S = {}> extends PureComponent<P, S> {
@@ -45,11 +50,11 @@ export default abstract class BaseComponent<P = {}, S = {}> extends PureComponen
 
   protected navigateBack = (): void => {
     this.navigation.goBack(null);
-  }
+  };
 
   protected navigate: {
-    (routeName: string, reset?: boolean): void
-    (routeName: string, params: any, reset?: boolean): void
+    (routeName: string, reset?: boolean): void;
+    (routeName: string, params: any, reset?: boolean): void;
   } = (routeName: string, resetOrParam?: any, forceReset?: any): void => {
     let params, reset: boolean;
 
@@ -66,22 +71,28 @@ export default abstract class BaseComponent<P = {}, S = {}> extends PureComponen
       return;
     }
 
-    this.navigation.dispatch(StackActions.reset({
-      index: 0,
-      key: null,
-      actions: [NavigationActions.navigate({
-        routeName,
-        params,
-        action: NavigationActions.navigate({ routeName, params })
-      })]
-    }));
-  }
+    this.navigation.dispatch(
+      StackActions.reset({
+        index: 0,
+        key: null,
+        actions: [
+          NavigationActions.navigate({
+            routeName,
+            params,
+            action: NavigationActions.navigate({ routeName, params })
+          })
+        ]
+      })
+    );
+  };
 
   protected navigateBuild(routes: NavigationNavigateActionPayload[]): void {
-    this.navigation.dispatch(StackActions.reset({
-      index: routes.length - 1,
-      key: null,
-      actions: routes.map(route => NavigationActions.navigate(route))
-    }));
+    this.navigation.dispatch(
+      StackActions.reset({
+        index: routes.length - 1,
+        key: null,
+        actions: routes.map(route => NavigationActions.navigate(route))
+      })
+    );
   }
 }

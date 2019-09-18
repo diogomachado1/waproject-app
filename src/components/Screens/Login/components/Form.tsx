@@ -1,19 +1,19 @@
-import ValidationContext from '@react-form-fields/native-base/components/ValidationContext';
-import FieldText from '@react-form-fields/native-base/components/Text';
+import FieldText from '@react-form-fields/native-base/Text';
+import ValidationContext from '@react-form-fields/native-base/ValidationContext';
 import { Button, Card, Text } from 'native-base';
 import React from 'react';
 import { StyleSheet } from 'react-native';
+import { filter } from 'rxjs/operators';
+import { variablesTheme } from '~/assets/theme';
 import FormComponent, { IStateForm } from '~/components/Shared/Abstract/Form';
 import Toast from '~/facades/toast';
-import RxOp from '~/rxjs-operators';
-import { theme } from '~/theme';
+import { bindComponent } from '~/helpers/rxjs-operators/bindComponent';
+import { logError } from '~/helpers/rxjs-operators/logError';
 
-interface IState extends IStateForm<{ email: string, password: string }> {
-
-}
+interface IState extends IStateForm<{ email: string; password: string }> {}
 
 interface IProps {
-  onSubmit: (model: { email: string, password: string }) => void;
+  onSubmit: (model: { email: string; password: string }) => void;
 }
 
 export default class LoginFormComponent extends FormComponent<IProps, IState> {
@@ -22,14 +22,19 @@ export default class LoginFormComponent extends FormComponent<IProps, IState> {
   };
 
   handleSubmit = () => {
-    this.isFormValid().pipe(
-      RxOp.filter(valid => valid),
-      RxOp.logError(),
-      RxOp.bindComponent(this)
-    ).subscribe(() => {
-      this.props.onSubmit(this.state.model as any);
-    }, err => Toast.error(err));
-  }
+    this.isFormValid()
+      .pipe(
+        filter(valid => valid),
+        logError(),
+        bindComponent(this)
+      )
+      .subscribe(
+        () => {
+          this.props.onSubmit(this.state.model as any);
+        },
+        err => Toast.showError(err)
+      );
+  };
 
   render() {
     const { model } = this.state;
@@ -37,16 +42,13 @@ export default class LoginFormComponent extends FormComponent<IProps, IState> {
     return (
       <ValidationContext ref={this.bindValidationContext}>
         <Card style={styles.card}>
-
           <FieldText
             placeholder='Email'
             keyboardType='email-address'
             validation='required|email'
             value={model.email}
-            ref={this.setFieldRef('email')}
-            next={this.getFieldRef('password')}
-            onChange={this.updateModel((v, m) => m.email = v)}
-            styles={this.inputStyles}
+            flowIndex={1}
+            onChange={this.updateModel((v, m) => (m.email = v))}
           />
 
           <FieldText
@@ -54,16 +56,14 @@ export default class LoginFormComponent extends FormComponent<IProps, IState> {
             secureTextEntry={true}
             validation='required'
             value={model.password}
-            ref={this.setFieldRef('password')}
-            onChange={this.updateModel((v, m) => m.password = v)}
-            onSubmit={this.handleSubmit}
-            styles={this.inputStyles}
+            flowIndex={2}
+            onChange={this.updateModel((v, m) => (m.password = v))}
+            onSubmitEditing={this.handleSubmit}
           />
 
           <Button style={styles.button} full onPress={this.handleSubmit}>
             <Text>Entrar</Text>
           </Button>
-
         </Card>
       </ValidationContext>
     );
@@ -76,14 +76,14 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingRight: 30,
     marginTop: 20,
-    width: theme.deviceWidth - 60,
+    width: variablesTheme.deviceWidth - 60,
     justifyContent: 'flex-start'
   },
   inputContainer: {
     paddingTop: 0
   },
   button: {
-    borderRadius: theme.borderRadiusBase,
+    borderRadius: variablesTheme.borderRadiusBase,
     marginTop: 10
   }
 });

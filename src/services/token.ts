@@ -3,9 +3,10 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { IAuthToken } from '~/interfaces/authToken';
 import { enRoles } from '~/interfaces/models/user';
 import { IUserToken } from '~/interfaces/tokens/user';
-import RxOp from '~/rxjs-operators';
 
 import storageService, { StorageService } from '~/facades/storage';
+import { logError } from '~/helpers/rxjs-operators/logError';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 export class TokenService {
   private tokens: IAuthToken;
@@ -14,21 +15,22 @@ export class TokenService {
   constructor(private storageService: StorageService) {
     this.authToken$ = new ReplaySubject(1);
 
-    this.storageService.get('authToken').pipe(
-      RxOp.logError()
-    ).subscribe(tokens => {
-      this.tokens = tokens;
-      this.authToken$.next(tokens);
-    });
+    this.storageService
+      .get('authToken')
+      .pipe(logError())
+      .subscribe(tokens => {
+        this.tokens = tokens;
+        this.authToken$.next(tokens);
+      });
   }
 
   public getToken(): Observable<IAuthToken> {
-    return this.authToken$.pipe(RxOp.distinctUntilChanged());
+    return this.authToken$.pipe(distinctUntilChanged());
   }
 
   public getUser(): Observable<IUserToken> {
     return this.getToken().pipe(
-      RxOp.map(tokens => {
+      map(tokens => {
         if (!tokens) return;
 
         const user: IUserToken = JSON.parse(base64.decode(tokens.accessToken.split('.')[1]));
@@ -57,7 +59,7 @@ export class TokenService {
 
   public setToken(tokens: IAuthToken): Observable<void> {
     return this.storageService.set('authToken', tokens).pipe(
-      RxOp.map(() => {
+      map(() => {
         this.tokens = tokens;
         this.authToken$.next(tokens);
       })
@@ -65,14 +67,14 @@ export class TokenService {
   }
 
   public clearToken(): Observable<void> {
-    return this.setToken(null).pipe(RxOp.map(() => null));
+    return this.setToken(null).pipe(map(() => null));
   }
 
   public setAccessToken(accessToken: string): Observable<void> {
     this.tokens.accessToken = accessToken;
 
     return this.storageService.set('authToken', this.tokens).pipe(
-      RxOp.map(() => {
+      map(() => {
         this.authToken$.next(this.tokens);
       })
     );
@@ -80,8 +82,9 @@ export class TokenService {
 
   public isAuthenticated(): Observable<boolean> {
     return this.getToken().pipe(
-      RxOp.map(token => !!token),
-      RxOp.distinctUntilChanged()
+      map(token => !!token),
+
+      distinctUntilChanged()
     );
   }
 }

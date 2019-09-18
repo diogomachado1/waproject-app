@@ -1,9 +1,9 @@
-import { createDrawerNavigator } from 'react-navigation';
 import HomePage from '~/components/Screens/Home';
 import ProfilePage from '~/components/Screens/Profile/Details';
-import { theme } from '~/theme';
 
 import { Drawer } from '../Shared/Drawer';
+import { createDrawerNavigator } from 'react-navigation-drawer';
+import { variablesTheme } from '~/assets/theme';
 
 export const HomeDrawerScreens: any = {
   Home: { screen: HomePage },
@@ -12,9 +12,9 @@ export const HomeDrawerScreens: any = {
 
 const HomeDrawerNavigator = createDrawerNavigator(HomeDrawerScreens, {
   initialRouteName: 'Home',
-  contentComponent: Drawer,
+  contentComponent: Drawer as any,
   contentOptions: {
-    activeTintColor: theme.accent,
+    activeTintColor: variablesTheme.accent
   }
 });
 

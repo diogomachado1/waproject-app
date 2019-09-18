@@ -13,9 +13,6 @@
 #import <React/RCTRootView.h>
 #import <React/RCTLinkingManager.h>
 #import "RNSplashScreen.h"
-#import <FBSDKCoreKit/FBSDKCoreKit.h>
-#import <RNGoogleSignin/RNGoogleSignin.h>
-#import <BugsnagReactNative/BugsnagReactNative.h>
 #import <Firebase.h>
 #import "RNFirebaseNotifications.h"
 #import "RNFirebaseMessaging.h"
@@ -24,23 +21,12 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  NSURL *jsCodeLocation;
-
-  #ifdef DEBUG
-    jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
-    // jsCodeLocation = [NSURL URLWithString:@"http://192.168.105.88:8081/index.bundle?platform=ios&dev=true"];
-  #else
-    jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
-  #endif
-
-  [BugsnagReactNative start];
+  NSURL *jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
 
   [FIRApp configure];
   [RNFirebaseNotifications configure];
 
   [[UNUserNotificationCenter currentNotificationCenter] setDelegate:self];
-  [[FBSDKApplicationDelegate sharedInstance] application:application didFinishLaunchingWithOptions:launchOptions];
-
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"reactApp"
                                                initialProperties:nil
@@ -78,18 +64,7 @@
         openURL:(NSURL *)url
         options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
   
-  BOOL handled = [[FBSDKApplicationDelegate sharedInstance] application:application
-                                                            openURL:url
-                                                            sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]
-                                                            annotation:options[UIApplicationOpenURLOptionsAnnotationKey]
-                  ]
-              ||
-                  [RNGoogleSignin application:application
-                                  openURL:url
-                                  sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]
-                                  annotation:options[UIApplicationOpenURLOptionsAnnotationKey]
-                  ]
-  || [RCTLinkingManager application:application openURL:url options:options];
+  BOOL handled = [RCTLinkingManager application:application openURL:url options:options];
 
   return handled;
 }
@@ -103,8 +78,6 @@
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-  [FBSDKAppEvents activateApp];
-
   #ifdef DEBUG
     application.idleTimerDisabled = YES; 
   #endif

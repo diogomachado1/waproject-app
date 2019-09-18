@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="br.com.waproject.base"
-    android:versionCode="0"
+    android:versionCode="1"
     android:versionName="1.0.0">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -10,13 +10,10 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <uses-sdk
-        android:minSdkVersion="16"
-        android:targetSdkVersion="26" />
-
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
+        android:usesCleartextTraffic="true"
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -76,7 +73,6 @@
         </service>
 
         <service android:name="io.invertase.firebase.messaging.RNFirebaseBackgroundMessagingService" />
-
 
     </application>
 </manifest>

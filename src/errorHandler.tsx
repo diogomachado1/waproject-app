@@ -11,10 +11,9 @@ setJSExceptionHandler((err: any, isFatal: boolean) => {
   logService.handleError(err);
 
   if (!isFatal) {
-    Toast.error(err);
+    Toast.showError(err);
     return;
   }
 
-  Alert.error(err, 'Reabrir', 'É necessário reabrir o app')
-    .subscribe(() => RNRestart.Restart());
+  Alert.error(err, 'Reabrir', 'É necessário reabrir o app').subscribe(() => RNRestart.Restart());
 }, !IS_DEV);

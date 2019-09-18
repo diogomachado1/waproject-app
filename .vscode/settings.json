@@ -1,25 +1,43 @@
 {
-  "editor.formatOnType": true,
+  "editor.formatOnPaste": false,
+  "editor.formatOnSave": false,
+  "editor.formatOnType": false,
   "eslint.enable": true,
-  "files.exclude": {
-    "**/.git": true,
-    "**/.svn": true,
-    "**/.hg": true,
-    "**/CVS": true,
-    "**/.DS_Store": true,
-    "*.zip": true,
-    "node_modules": false,
-    "*.apk": true,
-    "**/.directory": true
-  },
-  "files.associations": {
-    "*.js": "javascriptreact"
-  },
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "eslint.autoFixOnSave": true,
   "eslint.validate": [
     "javascript",
     "javascriptreact",
-    { "language": "typescript", "autoFix": true },
-    { "language": "typescriptreact", "autoFix": true }
+    {
+      "autoFix": true,
+      "language": "typescript"
+    },
+    {
+      "autoFix": true,
+      "language": "typescriptreact"
+    }
   ],
+  "typescriptHero.imports.stringQuoteStyle": "'",
+  "typescript.preferences.quoteStyle": "single",
+  "files.associations": {
+    ".env*": "properties",
+    "apple-app-site-association": "json",
+    "Fastfile": "ruby",
+    "Podfile": "ruby",
+    ".prettierrc": "json",
+    "*.js": "javascriptreact"
+  },
+  "files.exclude": {
+    "**/.DS_Store": true,
+    "**/.directory": true,
+    "**/.git": true,
+    "**/.hg": true,
+    "**/.svn": true,
+    "**/CVS": true,
+    "*.apk": true,
+    "*.zip": true,
+    "node_modules": false
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescriptHero.imports.organizeOnSave": true,
+  "typescriptHero.imports.multiLineTrailingComma": false
 }

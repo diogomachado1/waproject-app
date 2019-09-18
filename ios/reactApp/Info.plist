@@ -52,7 +52,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>0</string>
+	<string>1</string>
 	<key>FacebookAppID</key>
 	<string>231990960983128</string>
 	<key>FacebookDisplayName</key>
@@ -80,6 +80,8 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>Ionicons.ttf</string>
+		<string>Roboto_medium.ttf</string>
+		<string>Roboto.ttf</string>
 		<string>MaterialCommunityIcons.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>

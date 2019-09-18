@@ -1,20 +1,22 @@
-import ValidationContext from '@react-form-fields/native-base/components/ValidationContext';
-import FieldText from '@react-form-fields/native-base/components/Text';
+import ValidationContext from '@react-form-fields/native-base/ValidationContext';
+import FieldText from '@react-form-fields/native-base/Text';
 import { Button, Container, Content, Form, Icon, List } from 'native-base';
-import * as React from 'react';
-import { NavigationScreenConfig, NavigationScreenOptions } from 'react-navigation';
 import FormComponent, { IStateForm } from '~/components/Shared/Abstract/Form';
 import { IUser } from '~/interfaces/models/user';
 import Toast from '~/facades/toast';
-import RxOp from '~/rxjs-operators';
 import userService from '~/services/user';
-import { classes } from '~/theme';
+import { classes } from '~/assets/theme';
+import { NavigaitonOptions } from '~/hooks/useNavigation';
+import React from 'react';
+import { tap, filter, switchMap } from 'rxjs/operators';
+import { loader } from '~/helpers/rxjs-operators/loader';
+import { logError } from '~/helpers/rxjs-operators/logError';
+import { bindComponent } from '~/helpers/rxjs-operators/bindComponent';
 
-interface IState extends IStateForm<IUser> {
-}
+interface IState extends IStateForm<IUser> {}
 
 export default class UserEditPage extends FormComponent<{}, IState> {
-  static navigationOptions: NavigationScreenConfig<NavigationScreenOptions> = ({ navigation }) => {
+  static navigationOptions: NavigaitonOptions = ({ navigation }) => {
     return {
       title: 'Atualizar Perfil',
       headerRight: (
@@ -23,13 +25,13 @@ export default class UserEditPage extends FormComponent<{}, IState> {
         </Button>
       )
     };
-  }
+  };
 
   constructor(props: any) {
     super(props);
 
     this.state = {
-      model: { ...(this.params.user || {}) },
+      model: { ...(this.params.user || {}) }
     };
   }
 
@@ -38,16 +40,21 @@ export default class UserEditPage extends FormComponent<{}, IState> {
   }
 
   onSave = (): void => {
-    this.isFormValid().pipe(
-      RxOp.tap(valid => !valid && Toast.error('Revise os campos')),
-      RxOp.filter(valid => valid),
-      RxOp.switchMap(() => userService.save(this.state.model as IUser).pipe(RxOp.loader())),
-      RxOp.logError(),
-      RxOp.bindComponent(this)
-    ).subscribe(() => {
-      this.navigateBack();
-    }, err => Toast.error(err));
-  }
+    this.isFormValid()
+      .pipe(
+        tap(valid => !valid && Toast.showError('Revise os campos')),
+        filter(valid => valid),
+        switchMap(() => userService.save(this.state.model as IUser).pipe(loader())),
+        logError(),
+        bindComponent(this)
+      )
+      .subscribe(
+        () => {
+          this.navigateBack();
+        },
+        err => Toast.showError(err)
+      );
+  };
 
   render(): JSX.Element {
     let { model } = this.state;
@@ -60,35 +67,28 @@ export default class UserEditPage extends FormComponent<{}, IState> {
               <List>
                 <FieldText
                   label='Nome'
-                  icon='person'
                   validation='string|required|min:3|max:50'
                   value={model.firstName}
-                  ref={this.setFieldRef('firstName')}
-                  next={this.getFieldRef('lastName')}
-                  onChange={this.updateModel((value, model) => model.firstName = value)}
+                  flowIndex={1}
+                  onChange={this.updateModel((value, model) => (model.firstName = value))}
                 />
 
                 <FieldText
                   label='Sobrenome'
-                  icon='empty'
                   validation='string|max:50'
                   value={model.lastName}
-                  ref={this.setFieldRef('lastName')}
-                  next={this.getFieldRef('email')}
-                  onChange={this.updateModel((value, model) => model.lastName = value)}
+                  flowIndex={2}
+                  onChange={this.updateModel((value, model) => (model.lastName = value))}
                 />
 
                 <FieldText
                   label='Email'
-                  icon='mail'
                   validation='string|email|max:150'
                   keyboardType='email-address'
                   value={model.email}
-                  ref={this.setFieldRef('email')}
-                  next={this.getFieldRef('gender')}
-                  onChange={this.updateModel((value, model) => model.email = value)}
+                  flowIndex={3}
+                  onChange={this.updateModel((value, model) => (model.email = value))}
                 />
-
               </List>
             </ValidationContext>
           </Form>

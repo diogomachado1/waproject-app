@@ -2,7 +2,7 @@ import { Body, Button, Container, Content, Header, Icon, Left, Right, Text, Titl
 import * as React from 'react';
 import BaseComponent from '~/components/Shared/Abstract/Base';
 import { ServiceError } from '~/errors/serviceError';
-import { classes } from '~/theme';
+import { classes } from '~/assets/theme';
 
 export default class DevPage extends BaseComponent {
   testError = (): void => {
@@ -10,7 +10,7 @@ export default class DevPage extends BaseComponent {
       type: 'Teste',
       meta: 'just works'
     });
-  }
+  };
 
   public render(): JSX.Element {
     return (

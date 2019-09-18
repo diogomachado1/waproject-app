@@ -7,7 +7,5 @@ VERSION=$(node -p "require('$BASEDIR/../package.json').version")
 node $BASEDIR/change-version.js
 
 rm -f $BASEDIR/../App.apk
-(cd $BASEDIR/../android && ./gradlew assembleRelease)
-mv $BASEDIR/../android/app/build/outputs/apk/release/app-release.apk $BASEDIR/../App.apk
-
-sh $BASEDIR/upload-sourcemap.android.sh
+(cd $BASEDIR/../android && ./gradlew bundleRelease)
+mv $BASEDIR/../android/app/build/outputs/apk/release/app-release.apd $BASEDIR/../App.apd

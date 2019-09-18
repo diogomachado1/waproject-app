@@ -1,18 +1,21 @@
 import { Container, Text, View } from 'native-base';
 import * as React from 'react';
 import { Animated, Image, ImageBackground, StatusBar, StyleSheet } from 'react-native';
-import { NavigationScreenOptions } from 'react-navigation';
 import LoginFormComponent from '~/components/Screens/Login/components/Form';
 import LoginSocialComponent from '~/components/Screens/Login/components/Social';
 import BaseComponent from '~/components/Shared/Abstract/Base';
 import imageBackground from '~/images/background.jpg';
 import imageLogo from '~/images/logo.png';
 import Toast from '~/facades/toast';
-import RxOp from '~/rxjs-operators';
 import facebookService from '~/services/facebook';
 import googleService from '~/services/google';
 import userService from '~/services/user';
-import { theme } from '~/theme';
+import { NavigaitonOptions } from '~/hooks/useNavigation';
+import { loader } from '~/helpers/rxjs-operators/loader';
+import { variablesTheme } from '~/assets/theme';
+import { logError } from '~/helpers/rxjs-operators/logError';
+import { bindComponent } from '~/helpers/rxjs-operators/bindComponent';
+import { tap, filter, switchMap } from 'rxjs/operators';
 
 interface IState {
   animationFade: Animated.Value;
@@ -21,7 +24,7 @@ interface IState {
 }
 
 export default class LoginPage extends BaseComponent<{}, IState> {
-  static navigationOptions: NavigationScreenOptions = {
+  static navigationOptions: NavigaitonOptions = {
     header: null
   };
 
@@ -50,13 +53,16 @@ export default class LoginPage extends BaseComponent<{}, IState> {
     }).start();
   }
 
-  handleForm = (model: { email: string, password: string }) => {
-    userService.login(model.email, model.password).pipe(
-      RxOp.loader(),
-      RxOp.logError(),
-      RxOp.bindComponent(this)
-    ).subscribe(() => this.navigateToHome(), err => Toast.error(err));
-  }
+  handleForm = (model: { email: string; password: string }) => {
+    userService
+      .login(model.email, model.password)
+      .pipe(
+        loader(),
+        logError(),
+        bindComponent(this)
+      )
+      .subscribe(() => this.navigateToHome(), err => Toast.showError(err));
+  };
 
   handleLoginSocial = (provider: 'google' | 'facebook'): void => {
     const providers = {
@@ -64,19 +70,22 @@ export default class LoginPage extends BaseComponent<{}, IState> {
       google: googleService
     };
 
-    providers[provider].login().pipe(
-      RxOp.tap(a => console.log(a)),
-      RxOp.filter(accessToken => !!accessToken),
-      RxOp.switchMap(accessToken => userService.loginSocial(provider, accessToken)),
-      RxOp.loader(),
-      RxOp.logError(),
-      RxOp.bindComponent(this)
-    ).subscribe(() => this.navigateToHome(), err => Toast.error(err));
-  }
+    providers[provider]
+      .login()
+      .pipe(
+        tap(a => console.log(a)),
+        filter(accessToken => !!accessToken),
+        switchMap(accessToken => userService.loginSocial(provider, accessToken)),
+        loader(),
+        logError(),
+        bindComponent(this)
+      )
+      .subscribe(() => this.navigateToHome(), err => Toast.showError(err));
+  };
 
   navigateToHome = (): void => {
     this.navigate('Home', null, true);
-  }
+  };
 
   render(): JSX.Element {
     const { animationContainer } = this.state;
@@ -85,18 +94,14 @@ export default class LoginPage extends BaseComponent<{}, IState> {
       <Container>
         <StatusBar barStyle='light-content' backgroundColor='#000000' />
         <View style={styles.container}>
-
           <ImageBackground source={imageBackground} style={styles.background}>
             <Animated.View style={[animationContainer, styles.background]}>
-
               <Image source={imageLogo} style={styles.logo} />
               <Text style={styles.welcome}>Bem-vindo!</Text>
 
               <LoginFormComponent onSubmit={this.handleForm} />
               <LoginSocialComponent onClick={this.handleLoginSocial} />
-
             </Animated.View>
-
           </ImageBackground>
         </View>
       </Container>
@@ -130,7 +135,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    height: theme.deviceHeight,
-    width: theme.deviceWidth
+    height: variablesTheme.deviceHeight,
+    width: variablesTheme.deviceWidth
   }
 });

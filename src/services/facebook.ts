@@ -1,31 +1,28 @@
 import { AccessToken, LoginManager } from 'react-native-fbsdk';
-import * as rxjs from 'rxjs'; import { Observable } from 'rxjs';
+import { Observable, of, empty } from 'rxjs';
 
-import RxOp from '~/rxjs-operators';
 import logService, { LogService } from './log';
+import { tap, switchMap, catchError, map } from 'rxjs/operators';
 
 export class FacebookService {
-  constructor(private logService: LogService) { }
+  constructor(private logService: LogService) {}
 
   public login(): Observable<string> {
-    return rxjs.of(true).pipe(
-      RxOp.tap(() => this.logService.breadcrumb('Facebook Login')),
-      RxOp.tap(() => LoginManager.logOut()),
-      RxOp.switchMap(() => LoginManager.logInWithReadPermissions(['public_profile', 'email'])),
-      RxOp.switchMap(({ isCancelled }) => {
-        return isCancelled ?
-          rxjs.of({ accessToken: null }) :
-          AccessToken.getCurrentAccessToken();
+    return of(true).pipe(
+      tap(() => this.logService.breadcrumb('Facebook Login')),
+      tap(() => LoginManager.logOut()),
+      switchMap(() => LoginManager.logInWithPermissions(['public_profile', 'email'])),
+      switchMap(({ isCancelled }) => {
+        return isCancelled ? of({ accessToken: null }) : AccessToken.getCurrentAccessToken();
       }),
-      RxOp.catchError(err => {
-        if (err.message === 'Login Failed') return rxjs.empty();
+      catchError(err => {
+        if (err.message === 'Login Failed') return empty();
         return Observable.throw(err);
       }),
-      RxOp.map(({ accessToken }) => accessToken),
-      RxOp.tap(a => this.logService.breadcrumb(`Facebook Login ${a ? 'Completed' : 'Cancelled'}`))
+      map(({ accessToken }) => accessToken),
+      tap(a => this.logService.breadcrumb(`Facebook Login ${a ? 'Completed' : 'Cancelled'}`))
     );
   }
-
 }
 
 const facebookService = new FacebookService(logService);

@@ -6,26 +6,29 @@ export default {
     return /informativo\/(\d+)/.test(url);
   },
   async handle(url: string, dispatch: NavigationDispatch, appStarted: boolean): Promise<void> {
-    const id = /informativo\/(\d+)/ig.exec(url)[1];
+    const id = /informativo\/(\d+)/gi.exec(url)[1];
 
     if (appStarted) {
-      dispatch(StackActions.reset({
-        index: 0,
-        actions: [
-          NavigationActions.navigate({
-            routeName: 'Home',
-            action: NavigationActions.navigate({
-              routeName: 'InformativeTab'
+      dispatch(
+        StackActions.reset({
+          index: 0,
+          actions: [
+            NavigationActions.navigate({
+              routeName: 'Home',
+              action: NavigationActions.navigate({
+                routeName: 'InformativeTab'
+              })
             })
-          }),
-        ]
-      }));
+          ]
+        })
+      );
 
       await InteractionManager.runAfterInteractions();
     }
 
     dispatch({
-      type: 'Navigation/NAVIGATE', routeName: 'InformativeDetails',
+      type: 'Navigation/NAVIGATE',
+      routeName: 'InformativeDetails',
       params: { id }
     });
   }

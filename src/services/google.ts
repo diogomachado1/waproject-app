@@ -1,37 +1,31 @@
 import { GoogleSignin } from 'react-native-google-signin';
-import * as rxjs from 'rxjs';
-import { Observable } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 
-import RxOp from '~/rxjs-operators';
 import { GOOGLE_API } from '~/config';
 import logService, { LogService } from './log';
+import { tap, switchMap, catchError, map } from 'rxjs/operators';
 
 export class GoogleService {
-  constructor(
-    private logService: LogService,
-    googleApi: { iosClientId: string, webClientId: string }
-  ) {
+  constructor(private logService: LogService, googleApi: { iosClientId: string; webClientId: string }) {
     const options = { ...googleApi, offlineAccess: true };
 
-    GoogleSignin
-      .hasPlayServices()
+    GoogleSignin.hasPlayServices()
       .then(() => GoogleSignin.configure(options))
       .catch(err => logService.handleError(err));
   }
 
   public login(): Observable<string> {
-    return rxjs.of(true).pipe(
-      RxOp.tap(() => this.logService.breadcrumb('Google Login')),
-      RxOp.switchMap(() => GoogleSignin.signIn()),
-      RxOp.switchMap(() => GoogleSignin.getTokens()),
-      RxOp.catchError(err => {
-        return [-5, 12501].includes(err.code) ? rxjs.of({ accessToken: null }) : rxjs.throwError(err);
+    return of(true).pipe(
+      tap(() => this.logService.breadcrumb('Google Login')),
+      switchMap(() => GoogleSignin.signIn()),
+      switchMap(() => GoogleSignin.getTokens()),
+      catchError(err => {
+        return [-5, 12501].includes(err.code) ? of({ accessToken: null }) : throwError(err);
       }),
-      RxOp.map(({ accessToken }) => accessToken),
-      RxOp.tap(a => this.logService.breadcrumb(`Google Login ${a ? 'Completed' : 'Cancelled'}`))
+      map(({ accessToken }) => accessToken),
+      tap(a => this.logService.breadcrumb(`Google Login ${a ? 'Completed' : 'Cancelled'}`))
     );
   }
-
 }
 
 const googleService = new GoogleService(logService, GOOGLE_API);

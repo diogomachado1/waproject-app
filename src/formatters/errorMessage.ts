@@ -31,3 +31,15 @@ export function errorMessageFormatter(err: any): string {
       return 'Algo deu errado...';
   }
 }
+
+export function errorIconFormatter(error: any): string {
+  switch ((error || { message: '' }).message) {
+    case 'no-internet':
+    case 'NETWORK_ERROR':
+      return 'wifi-off';
+    case 'api-error':
+      return 'weather-lightning';
+    default:
+      return 'emoticon-sad';
+  }
+}

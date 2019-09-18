@@ -14,7 +14,9 @@
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["src/*"]
+      "~/*": [
+        "src/*"
+      ]
     },
     "outDir": "bin"
   },

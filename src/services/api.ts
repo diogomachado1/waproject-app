@@ -1,23 +1,17 @@
+import NetInfo from '@react-native-community/netinfo';
 import axios, { AxiosResponse, Method } from 'axios';
-import { NetInfo } from 'react-native';
-import * as rxjs from 'rxjs';
-import { Observable, ReplaySubject } from 'rxjs';
-
+import { Observable, ReplaySubject, throwError, of } from 'rxjs';
+import { catchError, distinctUntilChanged, first, map, sampleTime, switchMap } from 'rxjs/operators';
+import { API_ENDPOINT } from '~/config';
 import { ApiError } from '~/errors/api';
 import { NoInternetError } from '~/errors/noInternet';
-import RxOp from '~/rxjs-operators';
-import { API_ENDPOINT } from '~/config';
 import logService, { LogService } from './log';
 import tokenService, { TokenService } from './token';
 
 export class ApiService {
   private connection$: ReplaySubject<boolean>;
 
-  constructor(
-    private apiEndpoint: string,
-    private logService: LogService,
-    private tokenService: TokenService
-  ) {
+  constructor(private apiEndpoint: string, private logService: LogService, private tokenService: TokenService) {
     this.connection$ = new ReplaySubject(1);
     this.watchNetwork();
   }
@@ -35,28 +29,26 @@ export class ApiService {
   }
 
   public connection(): Observable<boolean> {
-    return this.connection$.pipe(
-      RxOp.distinctUntilChanged()
-    );
+    return this.connection$.pipe(distinctUntilChanged());
   }
 
   private request<T>(method: Method, url: string, data: any = null): Observable<T> {
     return this.connection$.pipe(
-      RxOp.sampleTime(500),
-      RxOp.first(),
-      RxOp.switchMap(connected => {
-        return !connected ?
-          rxjs.throwError(new NoInternetError()) :
-          this.tokenService.getToken().pipe();
+      sampleTime(500),
+      first(),
+      switchMap(connected => {
+        return !connected ? throwError(new NoInternetError()) : this.tokenService.getToken().pipe();
       }),
-      RxOp.first(),
-      RxOp.map(tokens => {
-        return !tokens ? {} : {
-          Authorization: `bearer ${tokens.accessToken}`,
-          RefreshToken: tokens.refreshToken
-        };
+      first(),
+      map(tokens => {
+        return !tokens
+          ? {}
+          : {
+              Authorization: `bearer ${tokens.accessToken}`,
+              RefreshToken: tokens.refreshToken
+            };
       }),
-      RxOp.switchMap(headers => {
+      switchMap(headers => {
         return axios.request({
           baseURL: this.apiEndpoint,
           url,
@@ -70,12 +62,10 @@ export class ApiService {
           data: method === 'POST' ? data : null
         });
       }),
-      RxOp.switchMap(res => this.checkNewToken(res)),
-      RxOp.map(response => response.data),
-      RxOp.catchError(err => {
-        return !err.config ?
-          rxjs.throwError(err) :
-          rxjs.throwError(new ApiError(err.config, err.response, err));
+      switchMap(res => this.checkNewToken(res)),
+      map(response => response.data),
+      catchError(err => {
+        return !err.config ? throwError(err) : throwError(new ApiError(err.config, err.response, err));
       })
     );
   }
@@ -84,14 +74,12 @@ export class ApiService {
     const accessToken = response.headers['x-token'];
 
     if (!accessToken) {
-      return rxjs.of(response);
+      return of(response);
     }
 
     this.logService.breadcrumb('Api New Token', 'manual', accessToken);
 
-    return this.tokenService
-      .setAccessToken(accessToken)
-      .pipe(RxOp.map(() => response));
+    return this.tokenService.setAccessToken(accessToken).pipe(map(() => response));
   }
 
   private watchNetwork(): void {
@@ -100,7 +88,6 @@ export class ApiService {
       this.connection$.next(isConnected);
     });
   }
-
 }
 
 const apiService = new ApiService(API_ENDPOINT, logService, tokenService);
