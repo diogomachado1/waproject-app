@@ -9,12 +9,12 @@ Android
 * Download Android Studio
 * Criar a variável ANDROID_HOME no .bashrc
 * Abir o SDK manager no Android Studio (marcar *Show Packages Details*):
-  * Android SDK (API 26)
-    * SDK Platform 26
-    * Google APIs 26
+  * Android SDK (API 29)
+    * SDK Platform 29
+    * Google APIs 29
   * Android SDK Tools
   * Android SDK Platform-Tools
-  * Android SDK Build-Tools: **v27.0.3**
+  * Android SDK Build-Tools
   * Android Support Repository
   * Google Play services
   * Google Repository
