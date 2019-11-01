@@ -27,9 +27,13 @@ async function init() {
   }
 
   await runScript(`${__dirname}/scripts/generate-key.js`, [false]);
-  await runScript(`${__dirname}/scripts/config-google.js`, [null], 'Deseja configurar o Google/Firebase agora?');
-  await runScript(`${__dirname}/scripts/config-facebook.js`, [null], 'Deseja configurar o Facebook?');
-  await runScript(`${__dirname}/scripts/config-bugsnag.js`, [null], 'Deseja configurar o Bugsnag?');
+  await runScript(`${__dirname}/scripts/config-firebase.js`, [null], 'Deseja configurar o Firebase agora?');
+  await runScript(`${__dirname}/scripts/config-sentry.js`, [null], 'Deseja configurar o Sentry?');
+
+  console.log('\n**********************************************************');
+  console.log('Completo!');
+  console.log('Lembre-se de criar o arquivo .env antes de iniciar o app');
+  console.log('**********************************************************\n');
 }
 
 async function askParams(answers = {}) {

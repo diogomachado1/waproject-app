@@ -1,7 +1,5 @@
 // @flow
-
 import variable from './../variables/platform';
-import { PLATFORM } from './../variables/commonColor';
 
 export default (variables /* : * */ = variable) => {
   const platformStyle = variables.platformStyle;
@@ -86,7 +84,7 @@ export default (variables /* : * */ = variable) => {
   const buttonTheme = {
     '.disabled': {
       '.transparent': {
-        backgroundColor: 'transparent',
+        'backgroundColor': 'transparent',
         'NativeBase.Text': {
           color: variables.buttonDisabledBg
         },
@@ -103,7 +101,7 @@ export default (variables /* : * */ = variable) => {
       'NativeBase.IconNB': {
         color: variables.brandLight
       },
-      backgroundColor: variables.buttonDisabledBg
+      'backgroundColor': variables.buttonDisabledBg
     },
     '.bordered': {
       '.dark': {
@@ -149,28 +147,28 @@ export default (variables /* : * */ = variable) => {
         borderWidth: variables.borderWidth * 2
       },
       '.disabled': {
-        backgroundColor: 'transparent',
-        borderColor: variables.buttonDisabledBg,
-        borderWidth: variables.borderWidth * 2,
+        'backgroundColor': 'transparent',
+        'borderColor': variables.buttonDisabledBg,
+        'borderWidth': variables.borderWidth * 2,
         'NativeBase.Text': {
           color: variables.buttonDisabledBg
         }
       },
       ...primaryCommon,
-      borderWidth: variables.borderWidth * 2,
-      elevation: null,
-      shadowColor: null,
-      shadowOffset: null,
-      shadowOpacity: null,
-      shadowRadius: null,
-      backgroundColor: 'transparent'
+      'borderWidth': variables.borderWidth * 2,
+      'elevation': null,
+      'shadowColor': null,
+      'shadowOffset': null,
+      'shadowOpacity': null,
+      'shadowRadius': null,
+      'backgroundColor': 'transparent'
     },
 
     '.dark': {
       '.bordered': {
         ...darkCommon
       },
-      backgroundColor: variables.brandDark
+      'backgroundColor': variables.brandDark
     },
     '.light': {
       '.transparent': {
@@ -181,42 +179,42 @@ export default (variables /* : * */ = variable) => {
         ...lightCommon
       },
       ...darkCommon,
-      backgroundColor: variables.brandLight
+      'backgroundColor': variables.brandLight
     },
 
     '.primary': {
       '.bordered': {
         ...primaryCommon
       },
-      backgroundColor: variables.buttonPrimaryBg
+      'backgroundColor': variables.buttonPrimaryBg
     },
 
     '.success': {
       '.bordered': {
         ...successCommon
       },
-      backgroundColor: variables.buttonSuccessBg
+      'backgroundColor': variables.buttonSuccessBg
     },
 
     '.info': {
       '.bordered': {
         ...infoCommon
       },
-      backgroundColor: variables.buttonInfoBg
+      'backgroundColor': variables.buttonInfoBg
     },
 
     '.warning': {
       '.bordered': {
         ...warningCommon
       },
-      backgroundColor: variables.buttonWarningBg
+      'backgroundColor': variables.buttonWarningBg
     },
 
     '.danger': {
       '.bordered': {
         ...dangerCommon
       },
-      backgroundColor: variables.buttonDangerBg
+      'backgroundColor': variables.buttonDangerBg
     },
 
     '.block': {
@@ -235,38 +233,38 @@ export default (variables /* : * */ = variable) => {
     },
 
     '.transparent': {
-      backgroundColor: 'transparent',
-      elevation: 0,
-      shadowColor: null,
-      shadowOffset: null,
-      shadowRadius: null,
-      shadowOpacity: null,
+      'backgroundColor': 'transparent',
+      'elevation': 0,
+      'shadowColor': null,
+      'shadowOffset': null,
+      'shadowRadius': null,
+      'shadowOpacity': null,
       ...primaryCommon,
       '.dark': {
-        ...darkCommon,
+        ...darkCommon
       },
       '.danger': {
-        ...dangerCommon,
+        ...dangerCommon
       },
       '.warning': {
-        ...warningCommon,
+        ...warningCommon
       },
       '.info': {
-        ...infoCommon,
+        ...infoCommon
       },
       '.primary': {
-        ...primaryCommon,
+        ...primaryCommon
       },
       '.success': {
-        ...successCommon,
+        ...successCommon
       },
       '.light': {
-        ...lightCommon,
+        ...lightCommon
       },
       '.disabled': {
-        backgroundColor: 'transparent',
-        borderColor: variables.buttonDisabledBg,
-        borderWidth: variables.borderWidth * 2,
+        'backgroundColor': 'transparent',
+        'borderColor': variables.buttonDisabledBg,
+        'borderWidth': variables.borderWidth * 2,
         'NativeBase.Text': {
           color: variables.buttonDisabledBg
         },
@@ -280,7 +278,7 @@ export default (variables /* : * */ = variable) => {
     },
 
     '.small': {
-      height: 30,
+      'height': 30,
       'NativeBase.Text': {
         fontSize: 14
       },
@@ -295,7 +293,7 @@ export default (variables /* : * */ = variable) => {
     },
 
     '.large': {
-      height: 60,
+      'height': 60,
       'NativeBase.Text': {
         fontSize: 22
       }
@@ -322,13 +320,13 @@ export default (variables /* : * */ = variable) => {
       color: variables.inverseTextColor,
       fontSize: 24,
       marginHorizontal: 16,
-      paddingTop: platform === PLATFORM.IOS ? 2 : undefined
+      paddingTop: platform === 'ios' ? 2 : undefined
     },
     'NativeBase.IconNB': {
       color: variables.inverseTextColor,
       fontSize: 24,
       marginHorizontal: 16,
-      paddingTop: platform === PLATFORM.IOS ? 2 : undefined
+      paddingTop: platform === 'ios' ? 2 : undefined
     },
 
     '.iconLeft': {
@@ -365,22 +363,20 @@ export default (variables /* : * */ = variable) => {
         }
       }
     },
-    paddingVertical: variables.buttonPadding,
-    backgroundColor: variables.buttonPrimaryBg,
-    borderRadius: variables.borderRadiusBase,
-    borderColor: variables.buttonPrimaryBg,
-    borderWidth: null,
-    height: 45,
-    flexDirection: 'row',
-    elevation: 2,
-    shadowColor:
-      platformStyle === PLATFORM.MATERIAL ? variables.brandDark : undefined,
-    shadowOffset:
-      platformStyle === PLATFORM.MATERIAL ? { width: 0, height: 2 } : undefined,
-    shadowOpacity: platformStyle === PLATFORM.MATERIAL ? 0.2 : undefined,
-    shadowRadius: platformStyle === PLATFORM.MATERIAL ? 1.2 : undefined,
-    alignItems: 'center',
-    justifyContent: 'space-between'
+    'paddingVertical': variables.buttonPadding,
+    'backgroundColor': variables.buttonPrimaryBg,
+    'borderRadius': variables.borderRadiusBase,
+    'borderColor': variables.buttonPrimaryBg,
+    'borderWidth': null,
+    'height': 45,
+    'flexDirection': 'row',
+    'elevation': 2,
+    'shadowColor': platformStyle === 'material' ? variables.brandDark : undefined,
+    'shadowOffset': platformStyle === 'material' ? { width: 0, height: 2 } : undefined,
+    'shadowOpacity': platformStyle === 'material' ? 0.2 : undefined,
+    'shadowRadius': platformStyle === 'material' ? 1.2 : undefined,
+    'alignItems': 'center',
+    'justifyContent': 'space-between'
   };
   return buttonTheme;
 };

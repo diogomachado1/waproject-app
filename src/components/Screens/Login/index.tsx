@@ -3,6 +3,7 @@ import ValidationContext, { IValidationContextRef } from '@react-form-fields/nat
 import { Button, Card, Text } from 'native-base';
 import React, { memo, useCallback, useRef } from 'react';
 import { Dimensions, Image, ImageBackground, Keyboard, StatusBar, StyleSheet, View } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import { useCallbackObservable } from 'react-use-observable';
 import { of, timer } from 'rxjs';
 import { filter, first, switchMap, tap } from 'rxjs/operators';
@@ -46,45 +47,47 @@ const LoginScreen = memo((props: IUseNavigation) => {
   return (
     <View style={styles.container}>
       <ImageBackground source={background} style={styles.background}>
-        <KeyboardScrollContainer withSafeArea style={{ width: '100%' }}>
+        <KeyboardScrollContainer withSafeArea>
           <StatusBar barStyle='light-content' backgroundColor='#000000' />
 
           <ValidationContext ref={validationRef}>
-            <Image source={logo} style={styles.img} resizeMode='contain' />
+            <Animatable.View style={styles.viewContainer} animation='fadeInUp' useNativeDriver={true}>
+              <Image source={logo} style={styles.img} resizeMode='contain' />
 
-            <Card style={styles.formContainer}>
-              <FieldText
-                leftIcon='account'
-                placeholder='Email'
-                value={model.email}
-                keyboardType='email-address'
-                validation='required|email'
-                autoCapitalize='none'
-                flowIndex={1}
-                marginBottom
-                hideErrorMessage
-                onChange={setModelProp('email', (model, value) => (model.email = value))}
-              />
+              <Card style={styles.formContainer}>
+                <FieldText
+                  leftIcon='email'
+                  placeholder='Email'
+                  value={model.email}
+                  keyboardType='email-address'
+                  validation='required|email'
+                  autoCapitalize='none'
+                  flowIndex={1}
+                  marginBottom
+                  hideErrorMessage
+                  onChange={setModelProp('email', (model, value) => (model.email = value))}
+                />
 
-              <FieldText
-                leftIcon='lock'
-                placeholder='Senha'
-                value={model.password}
-                secureTextEntry={true}
-                validation='required'
-                flowIndex={2}
-                marginBottom
-                hideErrorMessage
-                onChange={setModelProp('password', (model, value) => (model.password = value))}
-                onSubmitEditing={handleLogin}
-              />
-            </Card>
+                <FieldText
+                  leftIcon='lock'
+                  placeholder='Senha'
+                  value={model.password}
+                  secureTextEntry={true}
+                  validation='required'
+                  flowIndex={2}
+                  marginBottom
+                  hideErrorMessage
+                  onChange={setModelProp('password', (model, value) => (model.password = value))}
+                  onSubmitEditing={handleLogin}
+                />
+              </Card>
 
-            <View style={styles.registerContainer}>
-              <Button onPress={handleLogin} success block style={styles.buttons}>
-                <Text>Entrar</Text>
-              </Button>
-            </View>
+              <View style={styles.registerContainer}>
+                <Button onPress={handleLogin} success block style={styles.buttons}>
+                  <Text>Entrar</Text>
+                </Button>
+              </View>
+            </Animatable.View>
           </ValidationContext>
         </KeyboardScrollContainer>
       </ImageBackground>
@@ -110,10 +113,15 @@ const styles = StyleSheet.create({
     height: variablesTheme.deviceHeight,
     width: variablesTheme.deviceWidth
   },
+  viewContainer: {
+    flex: 1,
+    justifyContent: 'center'
+  },
   img: {
     marginBottom: 50,
+    marginTop: -50,
     alignSelf: 'center',
-    height: 100,
+    height: 150,
     width: 200,
     maxWidth: Dimensions.get('screen').width - 50
   },
@@ -121,7 +129,7 @@ const styles = StyleSheet.create({
     marginTop: 16
   },
   formContainer: {
-    flex: 1,
+    padding: 20,
     width: variablesTheme.deviceWidth * 0.8,
     flexShrink: 0
   },

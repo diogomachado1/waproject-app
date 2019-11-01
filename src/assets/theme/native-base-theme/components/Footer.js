@@ -1,7 +1,6 @@
 // @flow
-
 import variable from './../variables/platform';
-import { PLATFORM } from './../variables/commonColor';
+
 
 export default (variables /* : * */ = variable) => {
   const platformStyle = variables.platformStyle;
@@ -102,11 +101,11 @@ export default (variables /* : * */ = variable) => {
     flexDirection: 'row',
     justifyContent: 'center',
     borderTopWidth:
-      platform === PLATFORM.IOS && platformStyle !== PLATFORM.MATERIAL
+      platform === 'ios' && platformStyle !== 'material'
         ? variables.borderWidth
         : undefined,
     borderColor:
-      platform === PLATFORM.IOS && platformStyle !== PLATFORM.MATERIAL
+      platform === 'ios' && platformStyle !== 'material'
         ? '#cbcbcb'
         : undefined,
     height: variables.footerHeight,

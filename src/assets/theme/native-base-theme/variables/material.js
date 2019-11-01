@@ -1,16 +1,14 @@
 // @flow
-
 import color from 'color';
-import { Platform, Dimensions, PixelRatio } from 'react-native';
+import { Dimensions, PixelRatio, Platform } from 'react-native';
 
-import { PLATFORM } from './commonColor';
 
 const deviceHeight = Dimensions.get('window').height;
 const deviceWidth = Dimensions.get('window').width;
 const platform = Platform.OS;
-const platformStyle = PLATFORM.MATERIAL;
+const platformStyle = 'material';
 const isIphoneX =
-  platform === PLATFORM.IOS &&
+  platform === 'ios' &&
   (deviceHeight === 812 ||
     deviceWidth === 812 ||
     deviceHeight === 896 ||
@@ -108,7 +106,7 @@ export default {
   cardDefaultBg: '#fff',
   cardBorderColor: '#ccc',
   cardBorderRadius: 2,
-  cardItemPadding: platform === PLATFORM.IOS ? 10 : 12,
+  cardItemPadding: platform === 'ios' ? 10 : 12,
 
   // CheckBox
   CheckboxRadius: 0,
@@ -174,8 +172,8 @@ export default {
   toolbarHeight: 56,
   toolbarSearchIconSize: 23,
   toolbarInputColor: '#fff',
-  searchBarHeight: platform === PLATFORM.IOS ? 30 : 40,
-  searchBarInputHeight: platform === PLATFORM.IOS ? 40 : 50,
+  searchBarHeight: platform === 'ios' ? 30 : 40,
+  searchBarInputHeight: platform === 'ios' ? 40 : 50,
   toolbarBtnTextColor: '#fff',
   toolbarDefaultBorder: '#3F51B5',
   iosStatusbar: 'light-content',

@@ -10,5 +10,3 @@ export const IS_ANDROID = Platform.OS === 'android';
 export const SNACKBAR_TIMEOUT = 3000;
 export const SENTRY_DSN = ENV_SENTRY_DSN;
 export const API_ENDPOINT = ENV_API_ENDPOINT;
-
-console.log(ENV_SENTRY_DSN);

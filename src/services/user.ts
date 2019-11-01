@@ -1,4 +1,7 @@
 import device from 'react-native-device-info';
+import { Observable, of } from 'rxjs';
+import { distinctUntilChanged, first, map, switchMap } from 'rxjs/operators';
+import cache, { cacheClean } from '~/helpers/rxjs-operators/cache';
 import { IUser } from '~/interfaces/models/user';
 import { IUserToken } from '~/interfaces/tokens/user';
 
@@ -6,9 +9,6 @@ import apiService, { ApiService } from './api';
 import cacheService, { CacheService } from './cache';
 import notificationService, { NotificationService } from './notification';
 import tokenService, { TokenService } from './token';
-import { first, switchMap, map, distinctUntilChanged } from 'rxjs/operators';
-import cache, { ICacheResult, cacheClean } from '~/helpers/rxjs-operators/cache';
-import { Observable, of } from 'rxjs';
 
 export class UserService {
   constructor(
@@ -29,30 +29,16 @@ export class UserService {
           notificationToken
         });
       }),
-      switchMap(tokens => this.tokenService.setToken(tokens))
+      switchMap(tokens => this.tokenService.setTokens(tokens)),
+      map(() => null)
     );
   }
 
-  public loginSocial(provider: string, accessToken: string): Observable<void> {
-    return this.getDeviceInformation().pipe(
-      switchMap(({ deviceId, deviceName, notificationToken }) => {
-        return this.apiService.post('/auth/social/login', {
-          deviceId,
-          deviceName,
-          provider,
-          accessToken,
-          notificationToken
-        });
-      }),
-      switchMap(tokens => this.tokenService.setToken(tokens))
-    );
-  }
-
-  public get(refresh?: boolean): Observable<ICacheResult<IUser>> {
-    return this.tokenService.getToken().pipe(
+  public get(refresh?: boolean): Observable<IUser> {
+    return this.tokenService.getTokens().pipe(
       switchMap(token => {
         if (!token) {
-          return of({ updating: false, data: null });
+          return of(null);
         }
 
         return this.apiService.get<IUser>('profile').pipe(cache('service-profile', { refresh }));
@@ -81,10 +67,10 @@ export class UserService {
     );
   }
 
-  public updateNotificationToken(notificationToken: string): Observable<void> {
+  public updateSession(notificationToken: string): Observable<void> {
     return this.getDeviceInformation().pipe(
       switchMap(({ deviceId, deviceName }) => {
-        return this.apiService.post('/auth/opened', { deviceId, notificationToken, deviceName });
+        return this.apiService.post('/auth/opened', { deviceId, deviceName, notificationToken });
       })
     );
   }

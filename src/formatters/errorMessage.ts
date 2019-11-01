@@ -1,10 +1,4 @@
-import { IS_DEV } from '~/config';
-
 export function errorMessageFormatter(err: any): string {
-  if (IS_DEV) {
-    console.error(err.response || err);
-  }
-
   const status: any = {
     '-1': 'Servidor não encontrado',
     400: 'Dados inválidos',

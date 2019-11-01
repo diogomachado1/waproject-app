@@ -1,8 +1,15 @@
-lane :release do
-  sh("(cd ../../ && sh ./scripts/change-version.sh)")
-  
-  gradle(task: "clean assembleRelease")
-  upload_to_play_store
+default_platform(:android)
 
-  sh("(cd ../../ && sh ./scritps/upload-sourcemap.android.sh)")
+platform :android do
+  desc "Runs all the tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Deploy a new version to the Google Play"
+  lane :release do
+    sh("(cd ../../ && node ./scripts/change-version.js -f)")
+    gradle(task: 'bundle', build_type: 'Release')
+    upload_to_play_store(track: "alpha", skip_upload_apk: true)
+  end
 end

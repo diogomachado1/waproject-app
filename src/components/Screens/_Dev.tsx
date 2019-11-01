@@ -1,39 +1,41 @@
 import { Body, Button, Container, Content, Header, Icon, Left, Right, Text, Title, View } from 'native-base';
-import * as React from 'react';
-import BaseComponent from '~/components/Shared/Abstract/Base';
-import { ServiceError } from '~/errors/serviceError';
+import React, { memo, useCallback } from 'react';
 import { classes } from '~/assets/theme';
+import { ServiceError } from '~/errors/serviceError';
+import { IUseNavigation, useNavigation } from '~/hooks/useNavigation';
 
-export default class DevPage extends BaseComponent {
-  testError = (): void => {
+const DevPage = memo((props: IUseNavigation) => {
+  const navigation = useNavigation(props);
+
+  const testError = useCallback((): void => {
     throw new ServiceError('Test', {
       type: 'Teste',
       meta: 'just works'
     });
-  };
+  }, []);
 
-  public render(): JSX.Element {
-    return (
-      <Container style={classes.cardsContainer}>
-        <Header>
-          <Left>
-            <Button transparent onPress={this.navigateBack}>
-              <Icon active name='arrow-back' />
-            </Button>
-          </Left>
-          <Body>
-            <Title>Dev Menu</Title>
-          </Body>
-          <Right />
-        </Header>
-        <Content>
-          <View style={[classes.cardsPadding, classes.alignCenter]}>
-            <Button onPress={this.testError}>
-              <Text>Test Error</Text>
-            </Button>
-          </View>
-        </Content>
-      </Container>
-    );
-  }
-}
+  return (
+    <Container style={classes.cardsContainer}>
+      <Header>
+        <Left>
+          <Button transparent onPress={navigation.back}>
+            <Icon active name='arrow-back' />
+          </Button>
+        </Left>
+        <Body>
+          <Title>Dev Menu</Title>
+        </Body>
+        <Right />
+      </Header>
+      <Content>
+        <View style={[classes.cardsPadding, classes.alignCenter]}>
+          <Button onPress={testError}>
+            <Text>Test Error</Text>
+          </Button>
+        </View>
+      </Content>
+    </Container>
+  );
+});
+
+export default DevPage;

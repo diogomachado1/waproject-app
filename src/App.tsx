@@ -16,6 +16,7 @@ import { variablesTheme } from './assets/theme';
 import getTheme from './assets/theme/native-base-theme/components';
 import Navigator from './components/Navigator';
 import { InteractionManager } from './facades/interactionManager';
+import Toast from './facades/toast';
 import getCurrentRouteState from './helpers/currentRouteState';
 import { setupServices } from './services';
 import cacheService from './services/cache';
@@ -60,7 +61,7 @@ const App = memo(() => {
           })
         );
       }),
-      tap(() => feedbackMessageService.show('Sessão inválida', 'account-off', 'error', 4000))
+      tap(() => Toast.showError('Sessão inválida'))
     );
   }, [navigatorRef, currentScreen]);
 

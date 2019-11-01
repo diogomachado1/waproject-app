@@ -1,7 +1,6 @@
 // @flow
-
 import variable from './../variables/platform';
-import { PLATFORM } from './../variables/commonColor';
+
 
 export default (variables /* : * */ = variable) => {
   const platform = variables.platform;
@@ -14,8 +13,8 @@ export default (variables /* : * */ = variable) => {
     justifyContent: 'center',
     '.scrollable': {
       paddingHorizontal: 20,
-      flex: platform === PLATFORM.ANDROID ? 0 : 1,
-      minWidth: platform === PLATFORM.ANDROID ? undefined : 60
+      flex: platform === 'android' ? 0 : 1,
+      minWidth: platform === 'android' ? undefined : 60
     },
     'NativeBase.Text': {
       color: variables.topTabBarTextColor,
@@ -23,7 +22,7 @@ export default (variables /* : * */ = variable) => {
     },
     'NativeBase.Icon': {
       color: variables.topTabBarTextColor,
-      fontSize: platform === PLATFORM.IOS ? 26 : undefined
+      fontSize: platform === 'ios' ? 26 : undefined
     },
     '.active': {
       'NativeBase.Text': {

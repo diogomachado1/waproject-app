@@ -1,5 +1,7 @@
 set -e
+
 npx jetify
+# npx patch-package
 
 bold=$(tput bold)
 normal=$(tput sgr0)

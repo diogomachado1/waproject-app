@@ -1,12 +1,7 @@
 import { useMemo } from 'react';
-import { NavigationActions, NavigationScreenProps, StackActions } from 'react-navigation';
-import { NavigationStackOptions } from 'react-navigation-stack/lib/typescript/types';
-import { NavigationDrawerOptions } from 'react-navigation-drawer';
-import { NavigationScreenConfig } from 'react-navigation';
+import { NavigationActions, NavigationInjectedProps, StackActions } from 'react-navigation';
 
-export type NavigaitonOptions = NavigationScreenConfig<NavigationStackOptions | NavigationDrawerOptions, any>;
-
-export interface IUseNavigation extends Partial<NavigationScreenProps> {}
+export interface IUseNavigation extends Partial<NavigationInjectedProps> {}
 
 export function useNavigation({ navigation }: IUseNavigation) {
   return useMemo(
@@ -34,8 +29,11 @@ export function useNavigation({ navigation }: IUseNavigation) {
           })
         );
       },
-      getParams(paramName: string) {
+      getParam(paramName: string) {
         return navigation.getParam(paramName);
+      },
+      setParam(params: Parameters<typeof navigation.setParams>[0]) {
+        return navigation.setParams(params);
       }
     }),
     [navigation]

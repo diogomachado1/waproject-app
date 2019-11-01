@@ -1,7 +1,6 @@
 // @flow
-
 import variable from './../variables/platform';
-import { PLATFORM } from './../variables/commonColor';
+
 
 export default (variables /* : * */ = variable) => {
   const platform = variables.platform;
@@ -33,13 +32,13 @@ export default (variables /* : * */ = variable) => {
         }
       },
       '.first': {
-        borderTopLeftRadius: platform === PLATFORM.IOS ? 5 : undefined,
-        borderBottomLeftRadius: platform === PLATFORM.IOS ? 5 : undefined,
+        borderTopLeftRadius: platform === 'ios' ? 5 : undefined,
+        borderBottomLeftRadius: platform === 'ios' ? 5 : undefined,
         borderLeftWidth: 1
       },
       '.last': {
-        borderTopRightRadius: platform === PLATFORM.IOS ? 5 : undefined,
-        borderBottomRightRadius: platform === PLATFORM.IOS ? 5 : undefined
+        borderTopRightRadius: platform === 'ios' ? 5 : undefined,
+        borderBottomRightRadius: platform === 'ios' ? 5 : undefined
       },
       'NativeBase.Text': {
         color: variables.segmentTextColor,

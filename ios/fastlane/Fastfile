@@ -1,14 +1,9 @@
 lane :release do
-  sh("(cd ../../ && sh ./scripts/change-version.sh)")
+  sh("(cd ../../ && node ./scripts/change-version.js -f)")
   cocoapods
   
-  get_certificates           
   get_provisioning_profile   
-  get_push_certificate
 
-  enable_automatic_code_signing
-  build_app(scheme: "reactAppRelease", workspace: "reactApp.xcworkspace", include_bitcode: true)
-  upload_to_app_store
-
-  sh("(cd ../../ && sh ./scritps/upload-sourcemap.ios.sh)")
+  build_app(scheme: "reactAppRelease", workspace: "reactApp.xcworkspace", include_bitcode: true, silent: true)
+  upload_to_testflight
 end
