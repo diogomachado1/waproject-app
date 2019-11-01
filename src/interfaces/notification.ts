@@ -1,11 +1,16 @@
+import { Notification } from 'react-native-firebase/notifications';
 import { NavigationDispatch } from 'react-navigation';
 
-export interface INotificationInfo<T = any> {
-  action?: string;
-  userId?: string;
-  data?: T;
+export interface INotification extends Notification {
+  data: INotificationData;
 }
 
-export interface INotificationHandler<T extends { [key: string]: string } = any> {
-  (dispatch: NavigationDispatch, info: INotificationInfo<T>, appStarted: boolean): Promise<void>;
+export interface INotificationData {
+  action?: string;
+  userId?: string;
+  [key: string]: any;
+}
+
+export interface INotificationHandler {
+  (notification: INotificationData, dispatch: NavigationDispatch, appStarted: boolean): Promise<boolean>;
 }

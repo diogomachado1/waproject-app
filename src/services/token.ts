@@ -1,12 +1,11 @@
 import * as base64 from 'base-64';
 import { Observable, ReplaySubject } from 'rxjs';
+import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
+import storageService, { StorageService } from '~/facades/storage';
+import { logError } from '~/helpers/rxjs-operators/logError';
 import { IAuthToken } from '~/interfaces/authToken';
 import { enRoles } from '~/interfaces/models/user';
 import { IUserToken } from '~/interfaces/tokens/user';
-
-import storageService, { StorageService } from '~/facades/storage';
-import { logError } from '~/helpers/rxjs-operators/logError';
-import { distinctUntilChanged, map } from 'rxjs/operators';
 
 export class TokenService {
   private tokens: IAuthToken;
@@ -24,16 +23,18 @@ export class TokenService {
       });
   }
 
-  public getToken(): Observable<IAuthToken> {
+  public getTokens(): Observable<IAuthToken> {
     return this.authToken$.pipe(distinctUntilChanged());
   }
 
   public getUser(): Observable<IUserToken> {
-    return this.getToken().pipe(
-      map(tokens => {
-        if (!tokens) return;
+    return this.getTokens().pipe(
+      map(tokens => (tokens ? tokens.accessToken : null)),
+      distinctUntilChanged(),
+      map(accessToken => {
+        if (!accessToken) return;
 
-        const user: IUserToken = JSON.parse(base64.decode(tokens.accessToken.split('.')[1]));
+        const user: IUserToken = JSON.parse(base64.decode(accessToken.split('.')[1]));
 
         user.fullName = `${user.firstName} ${user.lastName}`;
         user.canAccess = (...roles: enRoles[]) => {
@@ -53,21 +54,23 @@ export class TokenService {
         };
 
         return user;
-      })
+      }),
+      shareReplay(1)
     );
   }
 
-  public setToken(tokens: IAuthToken): Observable<void> {
+  public setTokens(tokens: IAuthToken): Observable<IAuthToken> {
     return this.storageService.set('authToken', tokens).pipe(
       map(() => {
         this.tokens = tokens;
         this.authToken$.next(tokens);
+        return tokens;
       })
     );
   }
 
   public clearToken(): Observable<void> {
-    return this.setToken(null).pipe(map(() => null));
+    return this.setTokens(null).pipe(map(() => null));
   }
 
   public setAccessToken(accessToken: string): Observable<void> {
@@ -81,9 +84,8 @@ export class TokenService {
   }
 
   public isAuthenticated(): Observable<boolean> {
-    return this.getToken().pipe(
+    return this.getTokens().pipe(
       map(token => !!token),
-
       distinctUntilChanged()
     );
   }

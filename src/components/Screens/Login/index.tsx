@@ -1,135 +1,107 @@
-import { Container, Text, View } from 'native-base';
-import * as React from 'react';
-import { Animated, Image, ImageBackground, StatusBar, StyleSheet } from 'react-native';
-import LoginFormComponent from '~/components/Screens/Login/components/Form';
-import LoginSocialComponent from '~/components/Screens/Login/components/Social';
-import BaseComponent from '~/components/Shared/Abstract/Base';
-import imageBackground from '~/images/background.jpg';
-import imageLogo from '~/images/logo.png';
-import Toast from '~/facades/toast';
-import facebookService from '~/services/facebook';
-import googleService from '~/services/google';
-import userService from '~/services/user';
-import { NavigaitonOptions } from '~/hooks/useNavigation';
-import { loader } from '~/helpers/rxjs-operators/loader';
+import FieldText from '@react-form-fields/native-base/Text';
+import ValidationContext, { IValidationContextRef } from '@react-form-fields/native-base/ValidationContext';
+import { Button, Card, Text } from 'native-base';
+import React, { memo, useCallback, useRef } from 'react';
+import { Dimensions, Image, ImageBackground, Keyboard, StatusBar, StyleSheet, View } from 'react-native';
+import { useCallbackObservable } from 'react-use-observable';
+import { of, timer } from 'rxjs';
+import { filter, first, switchMap, tap } from 'rxjs/operators';
+import background from '~/assets/images/background.jpg';
+import logo from '~/assets/images/logo.png';
 import { variablesTheme } from '~/assets/theme';
+import KeyboardScrollContainer from '~/components/Shared/KeyboardScrollContainer';
+import Toast from '~/facades/toast';
+import { loader } from '~/helpers/rxjs-operators/loader';
 import { logError } from '~/helpers/rxjs-operators/logError';
-import { bindComponent } from '~/helpers/rxjs-operators/bindComponent';
-import { tap, filter, switchMap } from 'rxjs/operators';
+import useModel from '~/hooks/useModel';
+import { IUseNavigation, useNavigation } from '~/hooks/useNavigation';
+import userService from '~/services/user';
 
-interface IState {
-  animationFade: Animated.Value;
-  animationTranslate: Animated.Value;
-  animationContainer: any;
-}
+const LoginScreen = memo((props: IUseNavigation) => {
+  const [model, setModelProp] = useModel<{ email: string; password: string }>({});
 
-export default class LoginPage extends BaseComponent<{}, IState> {
-  static navigationOptions: NavigaitonOptions = {
+  const navigation = useNavigation(props);
+  const validationRef = useRef<IValidationContextRef>();
+
+  const onCompleteLogin = useCallback(() => navigation.navigate('Home', null, true), [navigation]);
+
+  const [handleLogin] = useCallbackObservable(() => {
+    const { email, password } = model;
+
+    return of(true).pipe(
+      tap(() => Keyboard.dismiss()),
+      switchMap(() => timer(500)),
+      first(),
+      switchMap(() => validationRef.current.isValid()),
+      filter(isValid => {
+        if (!isValid) Toast.showError('Verifique os campos obrigatórios');
+        return isValid;
+      }),
+      switchMap(() => userService.login(email, password).pipe(loader())),
+      tap(() => onCompleteLogin(), err => Toast.showError(err)),
+      logError()
+    );
+  }, [model, navigation, onCompleteLogin]);
+
+  return (
+    <View style={styles.container}>
+      <ImageBackground source={background} style={styles.background}>
+        <KeyboardScrollContainer withSafeArea style={{ width: '100%' }}>
+          <StatusBar barStyle='light-content' backgroundColor='#000000' />
+
+          <ValidationContext ref={validationRef}>
+            <Image source={logo} style={styles.img} resizeMode='contain' />
+
+            <Card style={styles.formContainer}>
+              <FieldText
+                leftIcon='account'
+                placeholder='Email'
+                value={model.email}
+                keyboardType='email-address'
+                validation='required|email'
+                autoCapitalize='none'
+                flowIndex={1}
+                marginBottom
+                hideErrorMessage
+                onChange={setModelProp('email', (model, value) => (model.email = value))}
+              />
+
+              <FieldText
+                leftIcon='lock'
+                placeholder='Senha'
+                value={model.password}
+                secureTextEntry={true}
+                validation='required'
+                flowIndex={2}
+                marginBottom
+                hideErrorMessage
+                onChange={setModelProp('password', (model, value) => (model.password = value))}
+                onSubmitEditing={handleLogin}
+              />
+            </Card>
+
+            <View style={styles.registerContainer}>
+              <Button onPress={handleLogin} success block style={styles.buttons}>
+                <Text>Entrar</Text>
+              </Button>
+            </View>
+          </ValidationContext>
+        </KeyboardScrollContainer>
+      </ImageBackground>
+    </View>
+  );
+});
+
+LoginScreen.navigationOptions = () => {
+  return {
     header: null
   };
-
-  constructor(props: any) {
-    super(props);
-
-    const fade = new Animated.Value(0);
-    const translate = new Animated.Value(-100);
-
-    this.state = {
-      animationFade: fade,
-      animationTranslate: translate,
-      animationContainer: { opacity: fade, transform: [{ translateY: translate }] }
-    };
-  }
-
-  componentDidMount(): void {
-    Animated.timing(this.state.animationFade, {
-      toValue: 1,
-      useNativeDriver: true
-    }).start();
-
-    Animated.timing(this.state.animationTranslate, {
-      toValue: 0,
-      useNativeDriver: true
-    }).start();
-  }
-
-  handleForm = (model: { email: string; password: string }) => {
-    userService
-      .login(model.email, model.password)
-      .pipe(
-        loader(),
-        logError(),
-        bindComponent(this)
-      )
-      .subscribe(() => this.navigateToHome(), err => Toast.showError(err));
-  };
-
-  handleLoginSocial = (provider: 'google' | 'facebook'): void => {
-    const providers = {
-      facebook: facebookService,
-      google: googleService
-    };
-
-    providers[provider]
-      .login()
-      .pipe(
-        tap(a => console.log(a)),
-        filter(accessToken => !!accessToken),
-        switchMap(accessToken => userService.loginSocial(provider, accessToken)),
-        loader(),
-        logError(),
-        bindComponent(this)
-      )
-      .subscribe(() => this.navigateToHome(), err => Toast.showError(err));
-  };
-
-  navigateToHome = (): void => {
-    this.navigate('Home', null, true);
-  };
-
-  render(): JSX.Element {
-    const { animationContainer } = this.state;
-
-    return (
-      <Container>
-        <StatusBar barStyle='light-content' backgroundColor='#000000' />
-        <View style={styles.container}>
-          <ImageBackground source={imageBackground} style={styles.background}>
-            <Animated.View style={[animationContainer, styles.background]}>
-              <Image source={imageLogo} style={styles.logo} />
-              <Text style={styles.welcome}>Bem-vindo!</Text>
-
-              <LoginFormComponent onSubmit={this.handleForm} />
-              <LoginSocialComponent onClick={this.handleLoginSocial} />
-            </Animated.View>
-          </ImageBackground>
-        </View>
-      </Container>
-    );
-  }
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'black'
-  },
-  logo: {
-    height: 120,
-    width: 120,
-    marginBottom: 10
-  },
-  welcome: {
-    fontSize: 30,
-    textAlign: 'center',
-    marginBottom: 5,
-    color: 'white',
-    backgroundColor: 'transparent',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10
+    backgroundColor: 'white'
   },
   background: {
     flex: 1,
@@ -137,5 +109,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: variablesTheme.deviceHeight,
     width: variablesTheme.deviceWidth
+  },
+  img: {
+    marginBottom: 50,
+    alignSelf: 'center',
+    height: 100,
+    width: 200,
+    maxWidth: Dimensions.get('screen').width - 50
+  },
+  buttons: {
+    marginTop: 16
+  },
+  formContainer: {
+    flex: 1,
+    width: variablesTheme.deviceWidth * 0.8,
+    flexShrink: 0
+  },
+  registerContainer: {
+    flex: 1,
+    flexGrow: 0,
+    flexShrink: 0
+  },
+  text: {
+    fontWeight: '600',
+    fontSize: 17
   }
 });
+
+export default LoginScreen;

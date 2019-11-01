@@ -1,33 +1,44 @@
-import * as React from 'react';
+import React, { memo, useEffect } from 'react';
 import { View } from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
-import { filter, first, map, switchMap } from 'rxjs/operators';
-import BaseComponent from '~/components/Shared/Abstract/Base';
-import { bindComponent } from '~/helpers/rxjs-operators/bindComponent';
+import { useObservable } from 'react-use-observable';
+import { filter, first, switchMap, tap } from 'rxjs/operators';
+import { IS_DEV } from '~/config';
 import { logError } from '~/helpers/rxjs-operators/logError';
+import { IUseNavigation, useNavigation } from '~/hooks/useNavigation';
 import { appDefaultNavigation, appOpened } from '~/services';
 import tokenService from '~/services/token';
 
-export default class IndexPage extends BaseComponent {
-  public componentWillMount(): void {
+const IndexPage = memo((props: IUseNavigation) => {
+  const navigation = useNavigation(props);
+
+  useEffect(() => {
     appOpened();
+  }, []);
 
-    appDefaultNavigation()
-      .pipe(
-        first(),
-        filter(ok => ok),
-        switchMap(() => tokenService.isAuthenticated()),
-        map(isAuthenticated => {
-          setTimeout(() => SplashScreen.hide(), 500);
-          this.navigate(isAuthenticated ? 'Homem' : 'Home', null, true);
-        }),
-        logError(),
-        bindComponent(this)
-      )
-      .subscribe();
-  }
+  useObservable(() => {
+    if (IS_DEV) SplashScreen.hide();
 
-  public render(): JSX.Element {
-    return <View />;
-  }
-}
+    return appDefaultNavigation().pipe(
+      first(),
+      filter(ok => ok),
+      switchMap(() => tokenService.isAuthenticated()),
+      tap(isAuthenticated => {
+        setTimeout(() => SplashScreen.hide(), 500);
+
+        navigation.navigate(isAuthenticated ? 'Home' : 'Login', null, true);
+      }),
+      logError()
+    );
+  }, []);
+
+  return <View />;
+});
+
+IndexPage.navigationOptions = () => {
+  return {
+    header: null
+  };
+};
+
+export default IndexPage;

@@ -15,6 +15,7 @@
   "parserOptions": {
     "ecmaVersion": 10,
     "sourceType": "module",
+    "project": "./tsconfig.json",
     "ecmaFeatures": {
       "modules": true,
       "jsx": true
@@ -101,6 +102,9 @@
     "react-native/no-inline-styles": 2,
     "@typescript-eslint/no-unused-vars": [
       "warn"
+    ],
+    "@typescript-eslint/await-thenable": [
+      "error"
     ],
     "@typescript-eslint/adjacent-overload-signatures": [
       "error"

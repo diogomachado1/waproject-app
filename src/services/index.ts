@@ -1,12 +1,10 @@
 import { NavigationScreenProp } from 'react-navigation';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, first, map, switchMap, tap } from 'rxjs/operators';
-import * as cacheOperator from '~/helpers/rxjs-operators/cache';
 import * as loaderOperator from '~/helpers/rxjs-operators/loader';
 import * as logErrorOperator from '~/helpers/rxjs-operators/logError';
 
 import apiService from './api';
-import cacheService from './cache';
 import linkingService from './linking';
 import loaderService from './loader';
 import logService from './log';
@@ -22,7 +20,7 @@ export function setupServices(navigator: NavigationScreenProp<any>): void {
   linkingService.setup(navigator);
   loaderOperator.setup(loaderService);
   logErrorOperator.setup(logService);
-  cacheOperator.setup(cacheService);
+  // cacheOperator.setup(cacheService);
 
   tokenService
     .getUser()
@@ -44,7 +42,7 @@ export function setupServices(navigator: NavigationScreenProp<any>): void {
         )
       ),
       filter(token => !!token),
-      switchMap(token => userService.updateNotificationToken(token)),
+      switchMap(token => userService.updateSession(token)),
       logErrorOperator.logError()
     )
     .subscribe(() => {}, () => {});

@@ -1,40 +1,17 @@
-import { Sentry } from 'react-native-sentry';
+import * as Sentry from '@sentry/react-native';
+import firebase from 'react-native-firebase';
 import { ENV, IS_DEV, SENTRY_DSN } from '~/config';
+import { ApiError } from '~/errors/api';
 import { IUserToken } from '~/interfaces/tokens/user';
 
 export class LogService {
   constructor() {
-    if (!IS_DEV) {
-      Sentry.config(SENTRY_DSN).install();
-    }
-
-    Sentry.setTagsContext({
-      environment: ENV,
-      react: true
-    });
-
-    Sentry.setShouldSendCallback((err: any) => {
-      if (!err) return false;
-
-      if (typeof err === 'string') {
-        err = new Error(err);
-      }
-
-      if (['NETWORK_ERROR'].includes(err.message)) {
-        return false;
-      }
-
-      if (err.ignoreLog) {
-        return false;
-      }
-
-      return true;
-    });
+    Sentry.init({ dsn: SENTRY_DSN, environment: ENV });
   }
 
   public setUser(user: IUserToken): void {
     if (!user) {
-      Sentry.setUserContext({
+      Sentry.setUser({
         id: null,
         email: null,
         username: null,
@@ -43,7 +20,7 @@ export class LogService {
       return;
     }
 
-    Sentry.setUserContext({
+    Sentry.setUser({
       id: user.id.toString(),
       email: user.email,
       username: user.email,
@@ -52,12 +29,38 @@ export class LogService {
   }
 
   public breadcrumb(message: string, category: string = 'manual', data: any = {}): void {
-    console.log(category + ' ' + message);
-    Sentry.captureBreadcrumb({ message, category, data });
+    firebase.crashlytics().setStringValue(`breadcrumb-${category}-${Date.now()}`, message);
+    firebase.crashlytics().setStringValue(`breadcrumb-${category}-${Date.now()}-data`, JSON.stringify(data));
+    Sentry.addBreadcrumb({ message, category, data });
   }
 
   public handleError(err: any): void {
+    if (!err) return;
+
+    if (typeof err === 'string') {
+      err = new Error(err);
+    }
+
+    if (['NETWORK_ERROR'].includes(err.message)) {
+      return;
+    }
+
+    if (!IS_DEV && err.ignoreLog) {
+      return;
+    }
+
     Sentry.captureException(err);
+    firebase.crashlytics().setStringValue('stack', err.stack);
+    firebase.crashlytics().recordCustomError(err.name || 'Error', err.message);
+
+    if (!IS_DEV) return;
+
+    console.log(
+      err instanceof ApiError
+        ? err.metadata.request.url + ': ' + JSON.stringify(err.metadata.response.data, null, 2)
+        : err
+    );
+    return;
   }
 }
 
